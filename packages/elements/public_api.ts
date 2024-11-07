@@ -19,7 +19,7 @@ export {
   WithProperties,
 } from './src/create-custom-element';
 
-export {ComponentNgElementStrategyFactory} from './src/component-factory-strategy';
+export {ComponentNgElementStrategy} from './src/component-factory-strategy';
 
 export {
   NgElementStrategy,
