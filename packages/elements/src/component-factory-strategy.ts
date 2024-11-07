@@ -64,7 +64,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
   readonly events = this.eventEmitters.pipe(switchMap((emitters) => merge(...emitters)));
 
   /** Reference to the component that was created on connect. */
-  private componentRef: ComponentRef<any> | null = null;
+  protected componentRef: ComponentRef<any> | null = null;
 
   /** Reference to the component view's `ChangeDetectorRef`. */
   private viewChangeDetectorRef: ChangeDetectorRef | null = null;
@@ -105,7 +105,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
 
   constructor(
     private componentFactory: ComponentFactory<any>,
-    private injector: Injector,
+    protected injector: Injector,
   ) {
     this.unchangedInputs = new Set<string>(
       this.componentFactory.inputs.map(({propName}) => propName),
@@ -334,7 +334,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
   }
 
   /** Runs in the angular zone, if present. */
-  private runInZone(fn: () => unknown) {
+  protected runInZone(fn: () => unknown) {
     return this.elementZone && Zone.current !== this.elementZone ? this.ngZone.run(fn) : fn();
   }
 }
