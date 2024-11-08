@@ -12,6 +12,7 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
+  EmbeddedViewRef,
   EventEmitter,
   Injector,
   NgZone,
@@ -145,6 +146,13 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
         return;
       }
 
+      // Save old position of the element node
+      const hostView = this.componentRef.hostView as EmbeddedViewRef<unknown>;
+      const viewNode = hostView?.rootNodes?.[0] as HTMLElement;
+      const parent = viewNode?.parentElement!;
+      const index = parent && Array.from(parent.childNodes).indexOf(viewNode);
+      const beforeOf = parent && parent.childNodes.item(index + 1);
+
       // Schedule the component to be destroyed after a small timeout in case it is being
       // moved elsewhere in the DOM
       this.scheduledDestroyFn = scheduler.schedule(() => {
@@ -152,6 +160,13 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
           this.componentRef.destroy();
           this.componentRef = null;
           this.viewChangeDetectorRef = null;
+
+          // Reattach the destroyed html element to the parent
+          if (parent) {
+            parent.insertBefore(viewNode, beforeOf);
+            // Clear dangling HTML child nodes, since angular component is destroyed
+            viewNode.replaceChildren();
+          }
         }
       }, DESTROY_DELAY);
     });
