@@ -157,6 +157,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
       // moved elsewhere in the DOM
       this.scheduledDestroyFn = scheduler.schedule(() => {
         if (this.componentRef !== null) {
+          this.beforeDestroy();
           this.componentRef.destroy();
           this.componentRef = null;
           this.viewChangeDetectorRef = null;
@@ -170,6 +171,12 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
         }
       }, DESTROY_DELAY);
     });
+  }
+
+  private beforeDestroy() {
+    this.componentFactory.inputs.forEach(input => {
+      this.initialInputValues.set(input.propName, this.componentRef!.instance[input.propName]);
+    })
   }
 
   /**
