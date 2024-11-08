@@ -169,6 +169,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
             viewNode.replaceChildren();
           }
         }
+        this.scheduledDestroyFn = null;
       }, DESTROY_DELAY);
     });
   }
