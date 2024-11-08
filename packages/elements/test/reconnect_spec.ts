@@ -12,6 +12,7 @@ import {
   destroyPlatform,
   Input,
   NgModule,
+  ViewEncapsulation,
 } from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
@@ -112,6 +113,43 @@ describe('Reconnect', () => {
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
   });
+
+  it('should be able to rebuild and reconnect after indirect disconnection via parent node, with slots', async () => {
+    const tpl = `<div class="root"><reconnect-slotted-el><span class="projected"></span></reconnect-slotted-el></div>`;
+    testContainer.innerHTML = tpl;
+    const root = testContainer.querySelector<HTMLDivElement>(".root")!;
+    const testEl = testContainer.querySelector("reconnect-slotted-el")!;
+
+    // Check that the Angular element was created and slots are projected
+    {
+      const content = testContainer.querySelector('span.projected')!;
+      const slot = testEl.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+      const assignedNodes = slot.assignedNodes();
+      expect(assignedNodes[0]).toBe(content);
+    }
+
+    // Now detach the root from the DOM
+    testContainer.removeChild(root);
+    // Wait for detach timer
+    await tick(10);
+
+    // Check that the web-element is still under root, but the Angular Component is destroyed
+    expect(testEl.parentElement).toBe(root);
+
+    // Now reattach root to testContainer
+    testContainer.appendChild(root);
+    // Check for re-render, but with the same instance of web-element
+    expect(testContainer.querySelectorAll("reconnect-slotted-el").length).toBe(1);
+    expect(testEl.shadowRoot!.querySelectorAll(".reconnect-slotted-el").length).toBe(1);    
+
+    // Check that the Angular element was re-created and slots are still projected
+    {
+      const content = testContainer.querySelector('span.projected')!;
+      const slot = testEl.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+      const assignedNodes = slot.assignedNodes();
+      expect(assignedNodes[0]).toBe(content);
+    }
+  });
 });
 
 interface ReconnectTestComponentEl {
@@ -128,8 +166,18 @@ class ReconnectTestComponent implements ReconnectTestComponentEl {
   constructor() {}
 }
 
+@Component({
+  selector: 'reconnect-slotted-el',
+  template: '<div class="reconnect-slotted-el"><slot></slot></div>',
+  encapsulation: ViewEncapsulation.ShadowDom,
+})
+class ReconnectSlottedTestComponent {
+  constructor() {}
+}
+
 const testElements = [
-  ReconnectTestComponent
+  ReconnectTestComponent,
+  ReconnectSlottedTestComponent
 ];
 
 @NgModule({imports: [BrowserModule], declarations: testElements})

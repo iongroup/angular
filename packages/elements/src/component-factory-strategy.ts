@@ -161,6 +161,11 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
           this.componentRef.destroy();
           this.componentRef = null;
           this.viewChangeDetectorRef = null;
+          // Clear shadow root as well, if there
+          if (viewNode?.shadowRoot) {
+            viewNode.shadowRoot.innerHTML = "";
+          }
+
           // Reattach the destroyed empty html element to the parent
           if (parent) {
             parent.insertBefore(viewNode, beforeOf);
