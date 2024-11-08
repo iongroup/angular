@@ -15,9 +15,13 @@ import {
 } from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
-import {fakeAsync, tick} from '@angular/core/testing';
 
 import {createCustomElement} from '../src/create-custom-element';
+
+// TODO: fakeAsync/tick not working, using real timeout here
+const tick = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 describe('Reconnect', () => {
   let testContainer: HTMLDivElement;
@@ -45,8 +49,8 @@ describe('Reconnect', () => {
     testContainer.remove();
     (testContainer as any) = null;
   });
-
-  it('should be able to rebuild and reconnect after parent disconnection', fakeAsync(() => {
+  
+  it('should be able to rebuild and reconnect after parent disconnection', async () => {
     const tpl = `<div class="root"><reconnect-el test-attr="a" [test-prop]="b"></reconnect-el></div>`;
     testContainer.innerHTML = tpl;
     const root = testContainer.querySelector<HTMLDivElement>(".root")!;
@@ -60,7 +64,7 @@ describe('Reconnect', () => {
     // Now detach the root from the DOM
     testContainer.removeChild(root);
     // Wait for detach timer
-    tick(10);
+    await tick(10);
     // Check that the web-element is still under root, but the Angular Component is destroyed
     expect(webEl.parentElement).toBe(root);
     expect(root.querySelector('.test-attr-outlet')).toBeFalsy();
@@ -74,7 +78,7 @@ describe('Reconnect', () => {
     expect(testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")).toBe(webEl);    
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
-  }));
+  });
 });
 
 interface ReconnectTestComponentEl {
