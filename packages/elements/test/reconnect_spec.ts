@@ -49,9 +49,40 @@ describe('Reconnect', () => {
     testContainer.remove();
     (testContainer as any) = null;
   });
-  
-  it('should be able to rebuild and reconnect after parent disconnection', async () => {
-    const tpl = `<div class="root"><reconnect-el test-attr="a" [test-prop]="b"></reconnect-el></div>`;
+
+  it('should be able to rebuild and reconnect after direct disconnection from parent', async () => {
+    // Create and attach it
+    const tpl = `<reconnect-el test-attr="a"></reconnect-el>`;
+    testContainer.innerHTML = tpl;
+    // Check that the Angular element was created and attributes are bound
+    expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
+    // Check that the Angular element was bound to properties too
+    const webEl = testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")!;
+    webEl.testProp = "b";
+    expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
+
+    // Now detach the element from the container
+    testContainer.removeChild(webEl);
+    // Wait for detach timer
+    await tick(10);
+    // Check that the web-element is orphan and the Angular Component is destroyed
+    expect(webEl.parentElement).toBeFalsy();
+    expect(webEl.querySelector('.test-attr-outlet')).toBeFalsy();
+    expect(webEl.querySelector('.test-prop-outlet')).toBeFalsy();
+    // Check property values to be maintained
+    expect(webEl.testProp).toBe("b");
+
+    // Now reattach root to testContainer
+    testContainer.appendChild(webEl);
+    // Check for re-render, but with the same instance of web-element
+    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>("reconnect-el").length).toBe(1);    
+    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>(".reconnect-el").length).toBe(1);    
+    expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
+    expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
+  });
+
+  it('should be able to rebuild and reconnect after indirect disconnection via parent node', async () => {
+    const tpl = `<div class="root"><reconnect-el test-attr="a"></reconnect-el></div>`;
     testContainer.innerHTML = tpl;
     const root = testContainer.querySelector<HTMLDivElement>(".root")!;
     // Check that the Angular element was created and attributes are bound
@@ -75,6 +106,8 @@ describe('Reconnect', () => {
     // Now reattach root to testContainer
     testContainer.appendChild(root);
     // Check for re-render, but with the same instance of web-element
+    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>("reconnect-el").length).toBe(1);    
+    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>(".reconnect-el").length).toBe(1);    
     expect(testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")).toBe(webEl);    
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
