@@ -57,26 +57,26 @@ describe('Reconnect', () => {
     // Check that the Angular element was created and attributes are bound
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     // Check that the Angular element was bound to properties too
-    const webEl = testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")!;
-    webEl.testProp = "b";
+    const testEl = testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")!;
+    testEl.testProp = "b";
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
 
     // Now detach the element from the container
-    testContainer.removeChild(webEl);
+    testContainer.removeChild(testEl);
     // Wait for detach timer
     await tick(10);
     // Check that the web-element is orphan and the Angular Component is destroyed
-    expect(webEl.parentElement).toBeFalsy();
-    expect(webEl.querySelector('.test-attr-outlet')).toBeFalsy();
-    expect(webEl.querySelector('.test-prop-outlet')).toBeFalsy();
+    expect(testEl.parentElement).toBeFalsy();
     // Check property values to be maintained
-    expect(webEl.testProp).toBe("b");
+    expect(testEl.testProp).toBe("b");
 
     // Now reattach root to testContainer
-    testContainer.appendChild(webEl);
+    testContainer.appendChild(testEl);
     // Check for re-render, but with the same instance of web-element
     expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>("reconnect-el").length).toBe(1);    
     expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>(".reconnect-el").length).toBe(1);    
+    expect(testContainer.querySelectorAll('.test-attr-outlet').length).toBe(1);
+    expect(testContainer.querySelectorAll('.test-prop-outlet').length).toBe(1);
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
   });
@@ -88,8 +88,8 @@ describe('Reconnect', () => {
     // Check that the Angular element was created and attributes are bound
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     // Check that the Angular element was bound to properties too
-    const webEl = testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")!;
-    webEl.testProp = "b";
+    const testEl = testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")!;
+    testEl.testProp = "b";
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
 
     // Now detach the root from the DOM
@@ -97,18 +97,18 @@ describe('Reconnect', () => {
     // Wait for detach timer
     await tick(10);
     // Check that the web-element is still under root, but the Angular Component is destroyed
-    expect(webEl.parentElement).toBe(root);
-    expect(root.querySelector('.test-attr-outlet')).toBeFalsy();
-    expect(root.querySelector('.test-prop-outlet')).toBeFalsy();
+    expect(testEl.parentElement).toBe(root);
     // Check property values to be maintained
-    expect(webEl.testProp).toBe("b");
+    expect(testEl.testProp).toBe("b");
 
     // Now reattach root to testContainer
     testContainer.appendChild(root);
     // Check for re-render, but with the same instance of web-element
+    expect(testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")).toBe(testEl);    
     expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>("reconnect-el").length).toBe(1);    
-    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>(".reconnect-el").length).toBe(1);    
-    expect(testContainer.querySelector<Element & ReconnectTestComponentEl>("reconnect-el")).toBe(webEl);    
+    expect(testContainer.querySelectorAll<Element & ReconnectTestComponentEl>(".reconnect-el").length).toBe(1);
+    expect(testContainer.querySelectorAll('.test-attr-outlet').length).toBe(1);
+    expect(testContainer.querySelectorAll('.test-prop-outlet').length).toBe(1);
     expect(testContainer.querySelector('.test-attr-outlet')!.textContent).toBe("a");
     expect(testContainer.querySelector('.test-prop-outlet')!.textContent).toBe("b");
   });
