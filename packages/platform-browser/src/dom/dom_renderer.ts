@@ -370,6 +370,8 @@ class ShadowDomRenderer extends DefaultDomRenderer2 {
     this.shadowRoot = (hostEl as Element).shadowRoot;
     if (!this.shadowRoot) {
       this.shadowRoot = (hostEl as Element).attachShadow({mode: 'open'});
+    } else {
+      this.shadowRoot.innerHTML = "";
     }
 
     this.sharedStylesHost.addHost(this.shadowRoot);
