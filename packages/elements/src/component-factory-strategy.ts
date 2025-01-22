@@ -12,6 +12,7 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
+  EmbeddedViewRef,
   EventEmitter,
   Injector,
   NgZone,
@@ -64,7 +65,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
   readonly events = this.eventEmitters.pipe(switchMap((emitters) => merge(...emitters)));
 
   /** Reference to the component that was created on connect. */
-  private componentRef: ComponentRef<any> | null = null;
+  protected componentRef: ComponentRef<any> | null = null;
 
   /** Reference to the component view's `ChangeDetectorRef`. */
   private viewChangeDetectorRef: ChangeDetectorRef | null = null;
@@ -105,7 +106,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
 
   constructor(
     private componentFactory: ComponentFactory<any>,
-    private injector: Injector,
+    protected injector: Injector,
   ) {
     this.unchangedInputs = new Set<string>(
       this.componentFactory.inputs.map(({propName}) => propName),
@@ -145,16 +146,53 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
         return;
       }
 
+      // Save old position of the element node
+
       // Schedule the component to be destroyed after a small timeout in case it is being
       // moved elsewhere in the DOM
       this.scheduledDestroyFn = scheduler.schedule(() => {
         if (this.componentRef !== null) {
+          // Save old position of the element node, to maintain it attached even
+          // after the this.componentRef.destroy, that detach it from parent
+          const attachInfo = this.getElementAttachPoint();
+          // Prepare back properties from componentRef to `initialInputValues`
+          this.resetProperties();
           this.componentRef.destroy();
           this.componentRef = null;
           this.viewChangeDetectorRef = null;
+          // Reattach the destroyed empty html element to the parent
+          if (attachInfo) {
+            const { parent, viewNode, beforeOf } = attachInfo;
+            parent.insertBefore(viewNode, beforeOf);
+          }
         }
+        this.scheduledDestroyFn = null;
       }, DESTROY_DELAY);
     });
+  }
+
+  /**
+   * Get the current attach point of the custom element and his position
+   */
+  private getElementAttachPoint(): { parent: HTMLElement, viewNode: HTMLElement, beforeOf: ChildNode } | undefined {
+    const hostView = this.componentRef!.hostView as EmbeddedViewRef<unknown>;
+    const viewNode = hostView?.rootNodes?.[0] as HTMLElement;
+    const parent = viewNode?.parentElement;
+    if (!parent) {
+      return;
+    }
+    const index = Array.from(parent.childNodes).indexOf(viewNode);
+    const beforeOf = parent.childNodes.item(index + 1);
+    return { parent, viewNode, beforeOf };
+  }
+
+  /**
+   * Copy back live properties from the componentRef (about to be destroyed) to initialInputValues for future reattach
+   */
+  private resetProperties() {
+    this.componentFactory.inputs.forEach(input => {
+      this.initialInputValues.set(input.propName, this.componentRef!.instance[input.propName]);
+    })
   }
 
   /**
@@ -334,7 +372,7 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
   }
 
   /** Runs in the angular zone, if present. */
-  private runInZone(fn: () => unknown) {
+  protected runInZone(fn: () => unknown) {
     return this.elementZone && Zone.current !== this.elementZone ? this.ngZone.run(fn) : fn();
   }
 }

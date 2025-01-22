@@ -367,7 +367,12 @@ class ShadowDomRenderer extends DefaultDomRenderer2 {
       platformIsServer: boolean,
   ) {
     super(eventManager, doc, ngZone, platformIsServer);
-    this.shadowRoot = (hostEl as any).attachShadow({mode: 'open'});
+    this.shadowRoot = (hostEl as Element).shadowRoot;
+    if (!this.shadowRoot) {
+      this.shadowRoot = (hostEl as Element).attachShadow({mode: 'open'});
+    } else {
+      this.shadowRoot.innerHTML = "";
+    }
 
     this.sharedStylesHost.addHost(this.shadowRoot);
     const styles = shimStylesContent(component.id, component.styles);

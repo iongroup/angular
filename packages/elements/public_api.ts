@@ -18,6 +18,9 @@ export {
   NgElementConstructor,
   WithProperties,
 } from './src/create-custom-element';
+
+export {ComponentNgElementStrategy} from './src/component-factory-strategy';
+
 export {
   NgElementStrategy,
   NgElementStrategyEvent,
