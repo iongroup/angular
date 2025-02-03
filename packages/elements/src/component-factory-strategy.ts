@@ -163,6 +163,11 @@ export class ComponentNgElementStrategy implements NgElementStrategy {
           // Reattach the destroyed empty html element to the parent
           if (attachInfo) {
             const { parent, viewNode, beforeOf } = attachInfo;
+            // Clear shadow DOM root context before reattaching the destroyed Angular component, 
+            // to fix memory leak through injected global-style
+            if (viewNode?.shadowRoot) {
+              viewNode.shadowRoot.innerHTML = "";
+            }
             parent.insertBefore(viewNode, beforeOf);
           }
         }
