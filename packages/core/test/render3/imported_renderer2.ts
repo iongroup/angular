@@ -59,6 +59,7 @@ export function getRendererFactory2(document: any): RendererFactory2 {
     new ɵSharedStylesHost(document, appId),
     appId,
     true,
+    false,
     document,
     isNode ? PLATFORM_SERVER_ID : PLATFORM_BROWSER_ID,
     fakeNgZone,
