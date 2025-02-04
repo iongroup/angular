@@ -77,17 +77,19 @@ export const REMOVE_STYLES_ON_COMPONENT_DESTROY = new InjectionToken<boolean>(
 
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates whether the style
- * of components that are using ShadowDom as encapsulation must remain isolated from other 
+ * of components that are using ShadowDom as encapsulation must remain isolated from other
  * components instances styles and/or global styles.
  *
  * By default, the value is set to `false`.
  * @publicApi
  */
-export const ISOLATED_SHADOW_DOM =
-    new InjectionToken<boolean>(ngDevMode ? 'IsolatedShadowDom' : '', {
-      providedIn: 'root',
-      factory: () => ISOLATED_SHADOW_DOM_DEFAULT,
-    });
+export const ISOLATED_SHADOW_DOM = new InjectionToken<boolean>(
+  ngDevMode ? 'IsolatedShadowDom' : '',
+  {
+    providedIn: 'root',
+    factory: () => ISOLATED_SHADOW_DOM_DEFAULT,
+  },
+);
 
 export function shimContentAttribute(componentShortId: string): string {
   return CONTENT_ATTR.replace(COMPONENT_REGEX, componentShortId);

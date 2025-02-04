@@ -87,13 +87,13 @@ describe('ShadowDOM Support', () => {
     const div = compEl.shadowRoot!.querySelector('div.green')!;
     // Not set before creating a sibling component
     expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
-    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1);  // one <style> element
+    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1); // one <style> element
     // Add NoneStyleComponent
     const compInstance = comp.componentInstance;
     const viewContainerRef = compInstance.viewContainerRef;
     viewContainerRef.createComponent(NoneStyleComponent);
-    expect(window.getComputedStyle(div).color).toEqual('rgb(0, 128, 0)');  // green
-    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(2);  // two <style> elements
+    expect(window.getComputedStyle(div).color).toEqual('rgb(0, 128, 0)'); // green
+    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(2); // two <style> elements
   });
 
   it('should inject Emulated shared styles in web elements', () => {
@@ -102,12 +102,12 @@ describe('ShadowDOM Support', () => {
     const div = compEl.shadowRoot!.querySelector('div.yellow')!;
     // Not set before creating a sibling component
     expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
-    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1);  // one <style> element
+    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1); // one <style> element
     // Add EmulatedStyleComponent
     const compInstance = comp.componentInstance;
     const viewContainerRef = compInstance.viewContainerRef;
     viewContainerRef.createComponent(EmulatedStyleComponent);
-    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(2);  // two <style> elements
+    expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(2); // two <style> elements
   });
 
   describe('should not inject shared styles in shadow dom when `ISOLATED_SHADOW_DOM` is `true`', () => {
@@ -115,7 +115,12 @@ describe('ShadowDOM Support', () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [BrowserModule],
-        declarations: [StyledShadowComponent, NoneStyleComponent, EmulatedStyleComponent, ShadowInjectedComponent],
+        declarations: [
+          StyledShadowComponent,
+          NoneStyleComponent,
+          EmulatedStyleComponent,
+          ShadowInjectedComponent,
+        ],
         providers: [
           {
             provide: ISOLATED_SHADOW_DOM,
@@ -131,7 +136,7 @@ describe('ShadowDOM Support', () => {
       const div = compEl.shadowRoot!.querySelector('div.green')!;
       // Not set before creating a sibling component
       expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
-      expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1);  // one <style> element
+      expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1); // one <style> element
       // Add NoneStyleComponent
       const compInstance = comp.componentInstance;
       const viewContainerRef = compInstance.viewContainerRef;
@@ -146,7 +151,7 @@ describe('ShadowDOM Support', () => {
       const div = compEl.shadowRoot!.querySelector('div.yellow')!;
       // Not set before creating a sibling component
       expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
-      expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1);  // one <style> element
+      expect(compEl.shadowRoot!.querySelectorAll('style').length).toEqual(1); // one <style> element
       // Add EmulatedStyleComponent
       const compInstance = comp.componentInstance;
       const viewContainerRef = compInstance.viewContainerRef;
@@ -203,8 +208,7 @@ class ShadowInjectedComponent {
 
 @Component({
   selector: 'none-style-comp',
-  template:
-    '<div class="green"></div>',
+  template: '<div class="green"></div>',
   styles: [`.green { color: green; }`],
   encapsulation: ViewEncapsulation.None,
   standalone: false,
@@ -213,8 +217,7 @@ class NoneStyleComponent {}
 
 @Component({
   selector: 'emulated-style-comp',
-  template:
-    '<div class="yellow"></div>',
+  template: '<div class="yellow"></div>',
   styles: [`.yellow { color: yellow; }`],
   encapsulation: ViewEncapsulation.Emulated,
   standalone: false,
@@ -223,7 +226,15 @@ class EmulatedStyleComponent {}
 
 @NgModule({
   imports: [BrowserModule],
-  declarations: [ShadowComponent, ShadowSlotComponent, ShadowSlotsComponent, StyledShadowComponent, NoneStyleComponent, EmulatedStyleComponent, ShadowInjectedComponent],
+  declarations: [
+    ShadowComponent,
+    ShadowSlotComponent,
+    ShadowSlotsComponent,
+    StyledShadowComponent,
+    NoneStyleComponent,
+    EmulatedStyleComponent,
+    ShadowInjectedComponent,
+  ],
 })
 class TestModule {
   ngDoBootstrap() {}
