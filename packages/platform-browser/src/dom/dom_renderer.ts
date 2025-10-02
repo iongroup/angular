@@ -508,7 +508,13 @@ class ShadowDomRenderer extends DefaultDomRenderer2 {
     tracingService: TracingService<TracingSnapshot> | null,
   ) {
     super(eventManager, doc, ngZone, platformIsServer, tracingService);
-    this.shadowRoot = (hostEl as any).attachShadow({mode: 'open'});
+    if (!this.shadowRoot) {
+      this.shadowRoot = (hostEl as Element).attachShadow({mode: 'open'});
+    } else {
+      // In case of custom elements, it is possible that the host element was already initialized during the
+      // element life-cycle (after a disconnect/reconnect)
+      this.shadowRoot.innerHTML = '';
+    }
     this.sharedStylesHost.addHost(this.shadowRoot);
     let styles = component.styles;
     if (ngDevMode) {
