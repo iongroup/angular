@@ -530,6 +530,7 @@ class ShadowDomRenderer extends DefaultDomRenderer2 {
     tracingService: TracingService<TracingSnapshot> | null,
   ) {
     super(eventManager, doc, ngZone, platformIsServer, tracingService);
+    this.shadowRoot = (hostEl as Element).shadowRoot;
     if (!this.shadowRoot) {
       this.shadowRoot = (hostEl as Element).attachShadow({mode: 'open'});
     } else {
