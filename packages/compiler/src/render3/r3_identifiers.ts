@@ -482,4 +482,9 @@ export class Identifiers {
   static UnwrapDirectiveSignalInputs = {name: 'ɵUnwrapDirectiveSignalInputs', moduleName: CORE};
   static unwrapWritableSignal = {name: 'ɵunwrapWritableSignal', moduleName: CORE};
   static assertType = {name: 'ɵassertType', moduleName: CORE};
+
+  // static InputFlags: o.ExternalReference = {
+  //   name: 'ɵɵInputFlags',
+  //   moduleName: CORE,
+  // };
 }
