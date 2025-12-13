@@ -238,7 +238,6 @@ export {
   ɵɵanimateEnterListener,
   ɵɵanimateLeave,
   ɵɵanimateLeaveListener,
-  ɵɵInputTransformsFeature,
 } from './render3/index';
 export {CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET} from './render3/interfaces/container';
 export {LContext as ɵLContext} from './render3/interfaces/context';
@@ -305,4 +304,7 @@ export {depsTracker as ɵdepsTracker} from './render3/deps_tracker/deps_tracker'
 export {generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError} from './render3/jit/module';
 export {getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn} from './render3/metadata';
 export {DeferBlockData as ɵDeferBlockData} from './render3/util/defer';
+
 export {InputFlags as ɵɵInputFlags} from './render3/interfaces/input_flags';
+export {ɵɵInputTransformsFeature} from './render3/polyfills/input_transforms_feature';
+export {ɵɵpropertyInterpolate} from './render3/polyfills/property_interpolate';
