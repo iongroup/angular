@@ -142,3 +142,8 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     );
   };
 }
+
+// Compat layer
+export {InputFlags as ɵɵInputFlags} from './render3/interfaces/input_flags';
+export {ɵɵInputTransformsFeature} from './compat/input_transforms_feature';
+export {ɵɵpropertyInterpolate} from './compat/property_interpolate';
