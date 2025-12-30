@@ -149,5 +149,6 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
 export {InputFlags as ɵɵInputFlags} from './render3/interfaces/input_flags';
 export {ɵɵInputTransformsFeature} from './compat/input_transforms_feature';
 export {ɵɵStandaloneFeature} from './compat/standalone_feature';
-export {ɵɵpropertyInterpolate} from './compat/property_interpolate';
+export {ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1} from './compat/property_interpolate';
 export {ɵɵclassMapInterpolate1} from './compat/class_map_interpolate';
+export {ɵPendingTasks} from './compat/pending_task';
