@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import {Component, effect, inject, model, WritableSignal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, model} from '@angular/core';
 import {IS_SEARCH_DIALOG_OPEN, Search} from '@angular/docs';
 import {RouterOutlet} from '@angular/router';
 
@@ -14,9 +14,10 @@ import {RouterOutlet} from '@angular/router';
   selector: 'adev-main',
   imports: [RouterOutlet],
   template: `<router-outlet />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MainComponent {
-  private readonly displaySearchDialog: WritableSignal<boolean> = inject(IS_SEARCH_DIALOG_OPEN);
+  private readonly displaySearchDialog = inject(IS_SEARCH_DIALOG_OPEN);
   private readonly searchService = inject(Search);
   readonly search = model<string | undefined>('');
 

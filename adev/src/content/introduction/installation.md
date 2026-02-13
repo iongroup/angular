@@ -35,21 +35,25 @@ Open a terminal (if you're using [Visual Studio Code](https://code.visualstudio.
 <docs-code-multifile>
   <docs-code
     header="npm"
+    language="shell"
     >
     npm install -g @angular/cli
     </docs-code>
   <docs-code
     header="pnpm"
+    language="shell"
     >
     pnpm install -g @angular/cli
     </docs-code>
   <docs-code
     header="yarn"
+    language="shell"
     >
     yarn global add @angular/cli
     </docs-code>
   <docs-code
     header="bun"
+    language="shell"
     >
     bun install -g @angular/cli
     </docs-code>
@@ -74,7 +78,7 @@ If you don't have any preferences, just hit the enter key to take the default op
 
 After you select the configuration options and the CLI runs through the setup, you should see the following message:
 
-```shell
+```text
 ✔ Packages installed successfully.
     Successfully initialized git.
 ```
@@ -101,7 +105,7 @@ npm start
 
 If everything is successful, you should see a similar confirmation message in your terminal:
 
-```shell
+```text
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
   ➜  Local:   http://localhost:4200/

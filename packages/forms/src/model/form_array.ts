@@ -113,6 +113,9 @@ export type ɵFormArrayRawValue<T extends AbstractControl<any>> = ɵTypedOrUntyp
  * the `FormArray` directly, as that result in strange and unexpected behavior such
  * as broken change detection.
  *
+ * @see [FormArray: Dynamic, Homogenous Collections](guide/forms/typed-forms#formcontrol-getting-started)
+ * @see [Creating dynamic forms](guide/forms/reactive-forms#creating-dynamic-forms)
+ *
  * @publicApi
  */
 export class FormArray<TControl extends AbstractControl<any> = any> extends AbstractControl<
@@ -174,6 +177,8 @@ export class FormArray<TControl extends AbstractControl<any> = any> extends Abst
    * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
    * `valueChanges` observables emit events with the latest status and value when the control is
    * inserted. When false, no events are emitted.
+   *
+   * NOTE: Pushing to the FormArray will not mark it dirty. If you want to mark if dirty, call `markAsDirty()`.
    */
   push(control: TControl | Array<TControl>, options: {emitEvent?: boolean} = {}): void {
     if (Array.isArray(control)) {
@@ -201,6 +206,8 @@ export class FormArray<TControl extends AbstractControl<any> = any> extends Abst
    * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
    * `valueChanges` observables emit events with the latest status and value when the control is
    * inserted. When false, no events are emitted.
+   *
+   * NOTE: Inserting to the FormArray will not mark it dirty. If you want to mark if dirty, call `markAsDirty()`.
    */
   insert(index: number, control: TControl, options: {emitEvent?: boolean} = {}): void {
     this.controls.splice(index, 0, control);
@@ -220,6 +227,8 @@ export class FormArray<TControl extends AbstractControl<any> = any> extends Abst
    * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
    * `valueChanges` observables emit events with the latest status and value when the control is
    * removed. When false, no events are emitted.
+   *
+   * NOTE: Removing the FormArray will not mark it dirty. If you want to mark if dirty, call `markAsDirty()`.
    */
   removeAt(index: number, options: {emitEvent?: boolean} = {}): void {
     // Adjust the index, then clamp it at no less than 0 to prevent undesired underflows.
@@ -575,6 +584,8 @@ export const UntypedFormArray: UntypedFormArrayCtor = FormArray;
 /**
  * @description
  * Asserts that the given control is an instance of `FormArray`
+ *
+ * @see [Utility functions for narrowing form control types](guide/forms/reactive-forms#utility-functions-for-narrowing-form-control-types)
  *
  * @publicApi
  */

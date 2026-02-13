@@ -25,7 +25,6 @@ import {ComponentTemplate, HostBindingsFunction, RenderFlags} from '../interface
 import {
   CONTEXT,
   EFFECTS_TO_SCHEDULE,
-  ANIMATIONS,
   ENVIRONMENT,
   FLAGS,
   InitPhaseState,
@@ -68,7 +67,7 @@ import {
 
 import {isDestroyed} from '../interfaces/type_checks';
 import {profiler} from '../profiler';
-import {ProfilerEvent} from '../profiler_types';
+import {ProfilerEvent} from '../../../primitives/profiler/src/profiler_types';
 import {executeViewQueryFn, refreshContentQueries} from '../queries/query_execution';
 import {runEffectsInView} from '../reactivity/view_effect_runner';
 import {executeTemplate} from './shared';
@@ -232,7 +231,6 @@ export function refreshView<T>(
     if (templateFn !== null) {
       executeTemplate(tView, lView, templateFn, RenderFlags.Update, context);
     }
-    runEnterAnimations(lView);
 
     const hooksInitPhaseCompleted =
       (flags & LViewFlags.InitPhaseStateMask) === InitPhaseState.InitPhaseCompleted;
@@ -371,16 +369,6 @@ export function refreshView<T>(
       }
     }
     leaveView();
-  }
-}
-
-function runEnterAnimations(lView: LView) {
-  const animationData = lView[ANIMATIONS];
-  if (animationData?.enter) {
-    for (const animateFn of animationData.enter) {
-      animateFn();
-    }
-    animationData.enter = undefined;
   }
 }
 

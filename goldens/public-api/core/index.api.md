@@ -1019,7 +1019,7 @@ export interface InputFunction {
     };
 }
 
-// @public
+// @public (undocumented)
 export interface InputOptions<T, TransformT> {
     alias?: string;
     debugName?: string;
@@ -1146,6 +1146,7 @@ export class KeyValueDiffers {
 // @public
 export function linkedSignal<D>(computation: () => D, options?: {
     equal?: ValueEqualityFn<NoInfer<D>>;
+    debugName?: string;
 }): WritableSignal<D>;
 
 // @public

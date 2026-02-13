@@ -269,7 +269,10 @@ export {
 } from './render3/jit/partial';
 export {compilePipe as ɵcompilePipe} from './render3/jit/pipe';
 export {isNgModule as ɵisNgModule} from './render3/jit/util';
-export {Profiler as ɵProfiler, ProfilerEvent as ɵProfilerEvent} from './render3/profiler_types';
+export {
+  Profiler as ɵProfiler,
+  ProfilerEvent as ɵProfilerEvent,
+} from '../primitives/profiler/src/profiler_types';
 export {
   FrameworkAgnosticGlobalUtils as ɵFrameworkAgnosticGlobalUtils,
   GlobalDevModeUtils as ɵGlobalDevModeUtils,
@@ -296,8 +299,8 @@ export {
   ɵɵsanitizeUrlOrResourceUrl,
   ɵɵtrustConstantHtml,
   ɵɵtrustConstantResourceUrl,
+  ɵɵvalidateAttribute,
 } from './sanitization/sanitization';
-export {ɵɵvalidateIframeAttribute} from './sanitization/iframe_attrs_validation';
 export {noSideEffects as ɵnoSideEffects} from './util/closure';
 export {AfterRenderManager as ɵAfterRenderManager} from './render3/after_render/manager';
 export {depsTracker as ɵdepsTracker} from './render3/deps_tracker/deps_tracker';

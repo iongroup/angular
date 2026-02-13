@@ -45,6 +45,9 @@ import {DestroyRef} from './linker/destroy_ref';
  * ```
  *
  * @publicApi
+ *
+ * @see [Unhandled errors in Angular](best-practices/error-handling)
+ *
  */
 export class ErrorHandler {
   /**
@@ -145,6 +148,8 @@ const globalErrorListeners = new InjectionToken<void>(ngDevMode ? 'GlobalErrorLi
  * Provides an environment initializer which forwards unhandled errors to the ErrorHandler.
  *
  * The listeners added are for the window's 'unhandledrejection' and 'error' events.
+ *
+ * @see [Global error listeners](best-practices/error-handling#global-error-listeners)
  *
  * @publicApi
  */

@@ -30,6 +30,7 @@ describe('Navigation', () => {
 
   const fakeVersionManager = {
     currentDocsVersion: signal('v17'),
+    currentDocsVersionMode: signal('stable'),
     versions: signal<Version[]>([]),
   };
 
@@ -84,7 +85,7 @@ describe('Navigation', () => {
 
   it('should call themeManager.setTheme(dark) when user tries to set dark theme', () => {
     const openThemePickerButton = fixture.debugElement.query(
-      By.css('button[aria-label^="Open theme picker"]'),
+      By.css('button[aria-label^="Change theme. Current theme:"]'),
     ).nativeElement;
     const setThemeSpy = spyOn(fakeThemeManager, 'setTheme');
 

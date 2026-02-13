@@ -100,6 +100,12 @@ export interface DirectiveDecorator {
 /**
  * Directive decorator and metadata.
  *
+ * @see [Built-in directives](guide/directives)
+ * @see [Including inputs and outputs](guide/directives/directive-composition-api#including-inputs-and-outputs)
+ * @see [Assigning a reference to an Angular directive](guide/templates/variables#assigning-a-reference-to-an-angular-directive)
+ * @see [Referencing component children with queries](guide/components/queries)
+ * @see [Binding to the host element](guide/components/host-elements#binding-to-the-host-element)
+ * @see [Host directive semantics](guide/directives/directive-composition-api#host-directive-semantics)
  * @Annotation
  * @publicApi
  */
@@ -528,6 +534,11 @@ export interface ComponentDecorator {
 /**
  * Supplies configuration metadata for an Angular component.
  *
+ * @see [Anatomy of a component](guide/components)
+ * @see [ChangeDetectionStrategy](guide/components/advanced-configuration#changedetectionstrategy)
+ * @see [Using the viewProviders array](guide/di/hierarchical-dependency-injection#using-the-viewproviders-array)
+ * @see [Style scoping](guide/components/styling#style-scoping)
+ *
  * @publicApi
  */
 export interface Component extends Directive {
@@ -716,7 +727,7 @@ export interface PipeDecorator {
    * to a template. To make it a member of an NgModule,
    * list it in the `declarations` field of the `NgModule` metadata.
    *
-   * @see [Style Guide: Pipe Names](style-guide#02-09)
+   * @see [Pipes](/guide/templates/pipes)
    *
    */
   (obj: Pipe): TypeDecorator;
@@ -941,6 +952,9 @@ export interface HostBindingDecorator {
    * change detection, and if a binding changes it updates the host element of the directive.
    *
    * @usageNotes
+   *
+   * NOTE:  **Always** prefer using the `host` property over `@HostBinding`.
+   * This decorator exist exclusively for backwards compatibility.
    *
    * The following example creates a directive that sets the `valid` and `invalid`
    * class, a style color, and an id on the DOM element that has an `ngModel` directive on it.

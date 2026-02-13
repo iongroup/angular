@@ -1395,6 +1395,101 @@ describe('control flow migration (ng update)', () => {
       );
     });
 
+    it('should migrate but not remove ng-templates when referenced elsewhere with a trailing semicolon', async () => {
+      writeFile(
+        '/comp.ts',
+        `
+        import {Component} from '@angular/core';
+        import {NgIf} from '@angular/common';
+
+        @Component({
+          templateUrl: './comp.html'
+        })
+        class Comp {
+          show = false;
+        }
+      `,
+      );
+
+      writeFile(
+        '/comp.html',
+        [
+          `<div>`,
+          `<span *ngIf="show; then thenBlock; else elseBlock">Ignored</span>`,
+          `<ng-template #thenBlock><div>THEN Stuff</div></ng-template>`,
+          `<ng-template #elseBlock>Else Content</ng-template>`,
+          `</div>`,
+          `<ng-container *ngTemplateOutlet="elseBlock;"></ng-container>`,
+        ].join('\n'),
+      );
+
+      await runMigration();
+      const content = tree.readContent('/comp.html');
+
+      expect(content).toBe(
+        [
+          `<div>`,
+          `  @if (show) {`,
+          `    <div>THEN Stuff</div>`,
+          `  } @else {`,
+          `    Else Content`,
+          `  }`,
+          `  <ng-template #elseBlock>Else Content</ng-template>`,
+          `</div>`,
+          `<ng-container *ngTemplateOutlet="elseBlock;"></ng-container>`,
+        ].join('\n'),
+      );
+    });
+
+    it('should migrate but not remove ng-templates when referenced elsewhere with a trailing semicolon including leading whitespace character', async () => {
+      writeFile(
+        '/comp.ts',
+        `
+        import {Component} from '@angular/core';
+        import {NgIf} from '@angular/common';
+
+        @Component({
+          templateUrl: './comp.html'
+        })
+        class Comp {
+          show = false;
+        }
+      `,
+      );
+
+      writeFile(
+        '/comp.html',
+        [
+          `<div>`,
+          `<span *ngIf="show; then thenBlock; else elseBlock">Ignored</span>`,
+          `<ng-template #thenBlock><div>THEN Stuff</div></ng-template>`,
+          `<ng-template #elseBlock let-ctx>{{ ctx }} Else Content</ng-template>`,
+          `</div>`,
+          `<ng-container *ngTemplateOutlet="
+              elseBlock;
+              context: $implicit: 'Hello'"></ng-container>`,
+        ].join('\n'),
+      );
+
+      await runMigration();
+      const content = tree.readContent('/comp.html');
+      expect(content).toBe(
+        [
+          `<div>`,
+          `  @if (show) {`,
+          `    <div>THEN Stuff</div>`,
+          `  } @else {`,
+          `    {{ ctx }} Else Content`,
+          `  }`,
+          `  <ng-template #elseBlock let-ctx>{{ ctx }} Else Content</ng-template>`,
+          `</div>`,
+          `<ng-container *ngTemplateOutlet="
+              elseBlock;
+              context: $implicit: 'Hello'"></ng-container>`,
+        ].join('\n'),
+      );
+    });
+
     it('should not remove ng-templates used by other directives', async () => {
       writeFile(
         '/comp.ts',
@@ -6926,9 +7021,7 @@ describe('control flow migration (ng generate)', () => {
   });
 
   describe('path', () => {
-    it('should throw an error if no files match the passed-in path', async () => {
-      let error: string | null = null;
-
+    it('should warn if no files match the passed-in path', async () => {
       writeFile(
         'dir.ts',
         `
@@ -6938,15 +7031,8 @@ describe('control flow migration (ng generate)', () => {
       `,
       );
 
-      try {
-        await runMigration('./foo');
-      } catch (e: any) {
-        error = e.message;
-      }
-
-      expect(error).toMatch(
-        /Could not find any files to migrate under the path .*\/foo\. Cannot run the control flow migration/,
-      );
+      await runMigration('./foo');
+      expect(warnOutput).toContain('Control flow migration did not find any files to migrate');
     });
 
     it('should throw an error if a path outside of the project is passed in', async () => {

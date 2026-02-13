@@ -60,6 +60,7 @@
     "lazy": [
       "AFTER_RENDER_SEQUENCES_TO_ADD",
       "ANIMATIONS",
+      "ANIMATION_QUEUE",
       "APP_BOOTSTRAP_LISTENER",
       "APP_ID",
       "APP_INITIALIZER",
@@ -109,6 +110,7 @@
       "DeferBlockBehavior",
       "DeferBlockInternalState",
       "DeferBlockState",
+      "DeferComponent",
       "DeferDependenciesLoadingState",
       "DestroyRef",
       "EFFECTS",
@@ -292,6 +294,7 @@
       "addAfterRenderSequencesForView",
       "addDepsToRegistry",
       "addLViewToLContainer",
+      "addToAnimationQueue",
       "addToArray",
       "addToEndOfViewTree",
       "addViewToDOM",
@@ -606,6 +609,7 @@
       "markViewForRefresh",
       "markedFeatures",
       "matchTemplateAttribute",
+      "maybeQueueEnterAnimation",
       "maybeReturnReactiveLViewConsumer",
       "maybeWrapInNotSelector",
       "mergeHostAttribute",
@@ -646,6 +650,7 @@
       "providerToFactory",
       "providerToRecord",
       "publishSignalConfiguration",
+      "queueEnterAnimations",
       "refreshContentQueries",
       "refreshView",
       "registerHostBindingOpCodes",
@@ -674,7 +679,6 @@
       "retrieveHydrationInfo",
       "runAfterLeaveAnimations",
       "runEffectsInView",
-      "runEnterAnimations",
       "runInInjectionContext",
       "runLeaveAnimationsWithCallback",
       "runPlatformInitializers",
@@ -744,8 +748,7 @@
       "wasLastNodeCreated",
       "writeDirectClass",
       "writeDirectStyle",
-      "writeToDirectiveInput",
-      "DeferComponent"
+      "writeToDirectiveInput"
     ]
   }
 }

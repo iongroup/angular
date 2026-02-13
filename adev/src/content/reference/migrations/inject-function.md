@@ -14,7 +14,7 @@ ng generate @angular/core:inject
 
 #### Before
 
-<docs-code language="typescript">
+```typescript
 import { Component, Inject, Optional } from '@angular/core';
 import { MyService } from './service';
 import { DI_TOKEN } from './token';
@@ -23,13 +23,14 @@ import { DI_TOKEN } from './token';
 export class MyComp {
   constructor(
     private service: MyService,
-    @Inject(DI_TOKEN) @Optional() readonly token: string) {}
+    @Inject(DI_TOKEN) @Optional() readonly token: string
+  ) {}
 }
-</docs-code>
+```
 
 #### After
 
-<docs-code language="typescript">
+```typescript
 import { Component, inject } from '@angular/core';
 import { MyService } from './service';
 import { DI_TOKEN } from './token';
@@ -39,7 +40,7 @@ export class MyComp {
   private service = inject(MyService);
   readonly token = inject(DI_TOKEN, { optional: true });
 }
-</docs-code>
+```
 
 ## Migration options
 
@@ -67,7 +68,7 @@ additional constructor signature to keep it backwards compatible, at the expense
 
 #### Before
 
-<docs-code language="typescript">
+```typescript
 import { Component } from '@angular/core';
 import { MyService } from './service';
 
@@ -75,24 +76,24 @@ import { MyService } from './service';
 export class MyComp {
   constructor(private service: MyService) {}
 }
-</docs-code>
+```
 
 #### After
 
-<docs-code language="typescript">
+```typescript
 import { Component } from '@angular/core';
 import { MyService } from './service';
 
 @Component()
 export class MyComp {
-  private service = inject(MyService);
+private service = inject(MyService);
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
+/\*_ Inserted by Angular inject() migration for backwards compatibility _/
+constructor(...args: unknown[]);
 
-  constructor() {}
+constructor() {}
 }
-</docs-code>
+```
 
 ### `nonNullableOptional`
 
@@ -108,7 +109,7 @@ because the code that depends on them likely already accounts for their nullabil
 
 #### Before
 
-<docs-code language="typescript">
+```typescript
 import { Component, Inject, Optional } from '@angular/core';
 import { TOKEN_ONE, TOKEN_TWO } from './token';
 
@@ -116,13 +117,14 @@ import { TOKEN_ONE, TOKEN_TWO } from './token';
 export class MyComp {
   constructor(
     @Inject(TOKEN_ONE) @Optional() private tokenOne: number,
-    @Inject(TOKEN_TWO) @Optional() private tokenTwo: string | null) {}
+    @Inject(TOKEN_TWO) @Optional() private tokenTwo: string | null
+  ) {}
 }
-</docs-code>
+```
 
 #### After
 
-<docs-code language="typescript">
+```typescript
 import { Component, inject } from '@angular/core';
 import { TOKEN_ONE, TOKEN_TWO } from './token';
 
@@ -134,4 +136,4 @@ export class MyComp {
   // Does not have `!` at the end, because the type was already nullable.
   private tokenTwo = inject(TOKEN_TWO, { optional: true });
 }
-</docs-code>
+```

@@ -29,12 +29,13 @@ import {
   Type,
   ɵperformanceMarkFeature as performanceMarkFeature,
   ɵIS_ENABLED_BLOCKING_INITIAL_NAVIGATION as IS_ENABLED_BLOCKING_INITIAL_NAVIGATION,
+  ɵpublishExternalGlobalUtil,
 } from '@angular/core';
 import {of, Subject} from 'rxjs';
 
 import {INPUT_BINDER, RoutedComponentInputBinder} from './directives/router_outlet';
 import {Event, NavigationError, stringifyEvent} from './events';
-import {RedirectCommand, Routes} from './models';
+import {RedirectCommand, Route, Routes} from './models';
 import {NAVIGATION_ERROR_HANDLER, NavigationTransitions} from './navigation_transition';
 import {Router} from './router';
 import {InMemoryScrollingOptions, ROUTER_CONFIGURATION, RouterConfigOptions} from './router_config';
@@ -50,6 +51,7 @@ import {
   VIEW_TRANSITION_OPTIONS,
   ViewTransitionsFeatureOptions,
 } from './utils/view_transition';
+import {getLoadedRoutes, getRouterInstance, navigateByUrl} from './router_devtools';
 
 /**
  * Sets up providers necessary to enable `Router` functionality for the application.
@@ -79,6 +81,7 @@ import {
  *   }
  * );
  * ```
+ * @see [Router](guide/routing)
  *
  * @see {@link RouterFeatures}
  *
@@ -88,6 +91,13 @@ import {
  * @returns A set of providers to setup a Router.
  */
 export function provideRouter(routes: Routes, ...features: RouterFeatures[]): EnvironmentProviders {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    // Publish this util when the router is provided so that the devtools can use it.
+    ɵpublishExternalGlobalUtil('ɵgetLoadedRoutes', getLoadedRoutes);
+    ɵpublishExternalGlobalUtil('ɵgetRouterInstance', getRouterInstance);
+    ɵpublishExternalGlobalUtil('ɵnavigateByUrl', navigateByUrl);
+  }
+
   return makeEnvironmentProviders([
     {provide: ROUTES, multi: true, useValue: routes},
     typeof ngDevMode === 'undefined' || ngDevMode
@@ -530,6 +540,8 @@ export type PreloadingFeature = RouterFeature<RouterFeatureKind.PreloadingFeatur
  *     should be used.
  * @returns A set of providers for use with `provideRouter`.
  *
+ * @see [Preloading strategy](guide/routing/customizing-route-behavior#preloading-strategy)
+ *
  * @publicApi
  */
 export function withPreloading(preloadingStrategy: Type<PreloadingStrategy>): PreloadingFeature {
@@ -575,6 +587,8 @@ export type RouterConfigurationFeature =
  * @param options A set of parameters to configure Router, see `RouterConfigOptions` for
  *     additional information.
  * @returns A set of providers for use with `provideRouter`.
+ *
+ * @see [Router configuration options](guide/routing/customizing-route-behavior#router-configuration-options)
  *
  * @publicApi
  */
@@ -663,6 +677,7 @@ export type NavigationErrorHandlerFeature =
  * @see {@link NavigationError}
  * @see {@link /api/core/inject inject}
  * @see {@link runInInjectionContext}
+ * @see [Centralize error handling in withNavigationErrorHandler](guide/routing/data-resolvers#centralize-error-handling-in-withnavigationerrorhandler)
  *
  * @returns A set of providers for use with `provideRouter`.
  *
@@ -773,6 +788,7 @@ export function withComponentInputBinding(): ComponentInputBindingFeature {
  * @returns A set of providers for use with `provideRouter`.
  * @see https://developer.chrome.com/docs/web-platform/view-transitions/
  * @see https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API
+ * @see [Route transition animations](guide/routing/route-transition-animations)
  * @developerPreview 19.0
  */
 export function withViewTransitions(

@@ -190,6 +190,9 @@ export interface FormControlOptions extends AbstractControlOptions {
  * console.log(control.value); // 'Drew'
  * console.log(control.status); // 'DISABLED'
  * ```
+ *
+ * @see [FormControl: Getting Started](guide/forms/typed-forms#formcontrol-getting-started)
+ *
  */
 export interface FormControl<TValue = any> extends AbstractControl<TValue> {
   /**
@@ -620,6 +623,8 @@ export const UntypedFormControl: UntypedFormControlCtor = FormControl;
 /**
  * @description
  * Asserts that the given control is an instance of `FormControl`
+ *
+ * @see [Utility functions for narrowing form control types](guide/forms/reactive-forms#utility-functions-for-narrowing-form-control-types)
  *
  * @publicApi
  */

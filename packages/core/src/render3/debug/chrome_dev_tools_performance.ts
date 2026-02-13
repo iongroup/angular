@@ -10,7 +10,7 @@ import {isTypeProvider} from '../../di/provider_collection';
 import {assertDefined, assertEqual} from '../../util/assert';
 import {performanceMarkFeature} from '../../util/performance';
 import {setProfiler} from '../profiler';
-import {Profiler, ProfilerEvent} from '../profiler_types';
+import {Profiler, ProfilerEvent} from '../../../primitives/profiler/src/profiler_types';
 import {stringifyForError} from '../util/stringify_utils';
 import {
   InjectorProfiler,
@@ -231,6 +231,7 @@ function getProviderTokenMeasureName<T>(token: any) {
  * @experimental
  *
  * @returns a function that can be invoked to stop sending profiling data.
+ * @see [Profiling with the Chrome DevTools](best-practices/profiling-with-chrome-devtools#recording-a-profile)
  */
 export function enableProfiling() {
   performanceMarkFeature('Chrome DevTools profiling');

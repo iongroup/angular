@@ -221,6 +221,8 @@ export class DocViewer {
       name: tab.getAttribute('path') ?? tab.getAttribute('header') ?? '',
       sanitizedContent: this.sanitizer.bypassSecurityTrustHtml(tab.innerHTML),
       visibleLinesRange: tab.getAttribute('visibleLines') ?? undefined,
+      shell: tab.classList.contains('shell'),
+      title: tab.getAttribute('header') ?? undefined,
     }));
   }
 
@@ -243,6 +245,7 @@ export class DocViewer {
         ? this.sanitizer.bypassSecurityTrustHtml(content.outerHTML)
         : '',
       visibleLinesRange: visibleLines,
+      shell: element.classList.contains('shell'),
     };
   }
 

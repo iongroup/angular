@@ -15,7 +15,6 @@ import {
   InjectionToken,
   NgZone,
   OnDestroy,
-  PLATFORM_ID,
   Renderer2,
   RendererFactory2,
   RendererStyleFlags2,
@@ -166,7 +165,6 @@ export class DomRendererFactory2 implements RendererFactory2, OnDestroy {
     @Inject(REMOVE_STYLES_ON_COMPONENT_DESTROY) private removeStylesOnCompDestroy: boolean,
     @Inject(ISOLATED_SHADOW_DOM) private readonly isolatedShadowDom: boolean,
     @Inject(DOCUMENT) private readonly doc: Document,
-    @Inject(PLATFORM_ID) readonly platformId: Object,
     readonly ngZone: NgZone,
     @Inject(CSP_NONCE) private readonly nonce: string | null = null,
     @Inject(TracingService)

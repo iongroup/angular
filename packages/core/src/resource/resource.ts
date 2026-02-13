@@ -9,7 +9,7 @@
 import {untracked} from '../render3/reactivity/untracked';
 import {computed} from '../render3/reactivity/computed';
 import {signal, signalAsReadonlyFn, WritableSignal} from '../render3/reactivity/signal';
-import {Signal} from '../render3/reactivity/api';
+import {Signal, ValueEqualityFn} from '../render3/reactivity/api';
 import {effect, EffectRef} from '../render3/reactivity/effect';
 import {
   ResourceOptions,
@@ -23,8 +23,6 @@ import {
   ResourceLoaderParams,
 } from './api';
 
-import {ValueEqualityFn} from '../../primitives/signals';
-
 import {Injector} from '../di/injector';
 import {assertInInjectionContext} from '../di/contextual';
 import {inject} from '../di/injector_compatibility';
@@ -33,19 +31,14 @@ import {linkedSignal} from '../render3/reactivity/linked_signal';
 import {DestroyRef} from '../linker/destroy_ref';
 
 /**
- * Whether a `Resource.value()` should throw an error when the resource is in the error state.
- *
- * This internal flag is being used to gradually roll out this behavior.
- */
-let RESOURCE_VALUE_THROWS_ERRORS_DEFAULT = true;
-
-/**
  * Constructs a `Resource` that projects a reactive request to an asynchronous operation defined by
  * a loader function, which exposes the result of the loading operation via signals.
  *
  * Note that `resource` is intended for _read_ operations, not operations which perform mutations.
  * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
  * request object becomes available, which could prematurely abort mutations.
+ *
+ * @see [Async reactivity with resources](guide/signals/resource)
  *
  * @experimental 19.0
  */
@@ -62,6 +55,7 @@ export function resource<T, R>(
  * request object becomes available, which could prematurely abort mutations.
  *
  * @experimental 19.0
+ * @see [Async reactivity with resources](guide/signals/resource)
  */
 export function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
 export function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined> {
@@ -79,7 +73,6 @@ export function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | 
     options.defaultValue,
     options.equal ? wrapEqualityFn(options.equal) : undefined,
     options.injector ?? inject(Injector),
-    RESOURCE_VALUE_THROWS_ERRORS_DEFAULT,
   );
 }
 
@@ -179,7 +172,6 @@ export class ResourceImpl<T, R> extends BaseWritableResource<T> implements Resou
     defaultValue: T,
     private readonly equal: ValueEqualityFn<T> | undefined,
     injector: Injector,
-    throwErrorsFromValue: boolean = RESOURCE_VALUE_THROWS_ERRORS_DEFAULT,
   ) {
     super(
       // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
@@ -198,11 +190,7 @@ export class ResourceImpl<T, R> extends BaseWritableResource<T> implements Resou
           }
 
           if (!isResolved(streamValue)) {
-            if (throwErrorsFromValue) {
-              throw new ResourceValueError(this.error()!);
-            } else {
-              return defaultValue;
-            }
+            throw new ResourceValueError(this.error()!);
           }
 
           return streamValue.value;

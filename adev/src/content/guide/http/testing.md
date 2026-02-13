@@ -10,7 +10,7 @@ At the end, tests can verify that the app made no unexpected requests.
 
 To begin testing usage of `HttpClient`, configure `TestBed` and include `provideHttpClient()` and `provideHttpClientTesting()` in your test's setup. This configures `HttpClient` to use a test backend instead of the real network. It also provides `HttpTestingController`, which you'll use to interact with the test backend, set expectations about which requests have been made, and flush responses to those requests. `HttpTestingController` can be injected from `TestBed` once configured.
 
-Keep in mind to provide `provideHttpClient()` **before** `provideHttpClientTesting()`, as `provideHttpClientTesting()` will overwrite parts of `provideHttpClient()`. Doing it the other way around can potentially break your tests.
+IMPORTANT: Keep in mind to provide `provideHttpClient()` **before** `provideHttpClientTesting()`, as `provideHttpClientTesting()` will overwrite parts of `provideHttpClient()`. Doing it the other way around can potentially break your tests.
 
 <docs-code language="ts">
 TestBed.configureTestingModule({
@@ -152,10 +152,10 @@ This behavior can be enforced with the use of an interceptor:
 export function authInterceptor(request: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
   const authService = inject(AuthService);
 
-  const clonedRequest = request.clone({
-    headers: request.headers.append('X-Authentication-Token', authService.getAuthToken()),
-  });
-  return next(clonedRequest);
+const clonedRequest = request.clone({
+headers: request.headers.append('X-Authentication-Token', authService.getAuthToken()),
+});
+return next(clonedRequest);
 }
 </docs-code>
 
@@ -188,12 +188,12 @@ A similar interceptor could be implemented with class based interceptors:
 export class AuthInterceptor implements HttpInterceptor {
   private authService = inject(AuthService);
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const clonedRequest = request.clone({
-      headers: request.headers.append('X-Authentication-Token', this.authService.getAuthToken()),
-    });
-    return next.handle(clonedRequest);
-  }
+intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+const clonedRequest = request.clone({
+headers: request.headers.append('X-Authentication-Token', this.authService.getAuthToken()),
+});
+return next.handle(clonedRequest);
+}
 }
 </docs-code>
 
