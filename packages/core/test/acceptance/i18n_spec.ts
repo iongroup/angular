@@ -13,6 +13,7 @@ import {CommonModule, DOCUMENT, registerLocaleData} from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import localeRo from '@angular/common/locales/ro';
 import {computeMsgId} from '@angular/compiler';
+import {isBrowser} from '@angular/private/testing';
 import {
   Attribute,
   Component,
@@ -3506,7 +3507,7 @@ describe('runtime i18n', () => {
         <div i18n>{
           parameters.length,
           plural,
-          =1 {Affects parameter <span class="parameter-name" attr="should_be_present">{{parameters[0].name}}</span>}
+          =1 {Affects parameter <span class="parameter-name" label="should_be_present">{{parameters[0].name}}</span>}
           other {Affects {{parameters.length}} parameters, including <span
               class="parameter-name">{{parameters[0].name}}</span>}
           }</div>
@@ -3521,7 +3522,7 @@ describe('runtime i18n', () => {
     const fixture = TestBed.createComponent(MyApp);
     fixture.detectChanges();
     const span = (fixture.nativeElement as HTMLElement).querySelector('span')!;
-    expect(span.getAttribute('attr')).toEqual('should_be_present');
+    expect(span.getAttribute('label')).toEqual('should_be_present');
     expect(span.getAttribute('class')).toEqual('parameter-name');
   });
 
@@ -3606,6 +3607,92 @@ describe('runtime i18n', () => {
     expect(fixture.nativeElement.querySelector('div').getAttribute('title')).toBe(
       'translatedText value',
     );
+  });
+
+  describe('attribute sanitization', () => {
+    @Component({template: ''})
+    class SanitizeAppComp {
+      url = 'javascript:alert("oh no")';
+      count = 0;
+    }
+
+    it('should sanitize translated attribute binding', () => {
+      const fixture = initWithTemplate(SanitizeAppComp, '<a [attr.href]="url" i18n-href></a>');
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize translated property binding', () => {
+      const fixture = initWithTemplate(SanitizeAppComp, '<a [href]="url" i18n-href></a>');
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize translated interpolation', () => {
+      const fixture = initWithTemplate(SanitizeAppComp, '<a href="{{url}}" i18n-href></a>');
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize interpolation inside translated element', () => {
+      const fixture = initWithTemplate(SanitizeAppComp, `<div i18n><a href="{{url}}"></a></div>`);
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize attribute binding inside translated element', () => {
+      const fixture = initWithTemplate(
+        SanitizeAppComp,
+        `<div i18n><a [attr.href]="url"></a></div>`,
+      );
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize property binding inside translated element', () => {
+      const fixture = initWithTemplate(SanitizeAppComp, `<div i18n><a [href]="url"></a></div>`);
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize property binding inside an ICU', () => {
+      const fixture = initWithTemplate(
+        SanitizeAppComp,
+        `<div i18n>{count, plural,
+            =0 {no <strong>link</strong> yet}
+            other {{{count}} Here is the <a href="{{url}}">link</a>!}
+        }</div>`,
+      );
+
+      expect(fixture.nativeElement.querySelector('a')).toBeFalsy();
+
+      fixture.componentInstance.count = 1;
+      fixture.detectChanges();
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+      expect(link).toBeTruthy();
+      expect(link.getAttribute('href')).toMatch(/^unsafe:/);
+    });
+
+    it('should sanitize action binding', () => {
+      const fixture = initWithTemplate(
+        SanitizeAppComp,
+        '<form action="{{url}}" i18n-action></form>',
+      );
+      const form: HTMLFormElement = fixture.nativeElement.querySelector('form');
+      expect(form.getAttribute('action')).toMatch(/^unsafe:/);
+    });
+
+    // Skip this test in Node, because Domino doesn't support `formAction`.
+    if (isBrowser) {
+      it('should sanitize formaction binding', () => {
+        const fixture = initWithTemplate(
+          SanitizeAppComp,
+          '<input type="text" formaction="{{url}}" i18n-formaction>',
+        );
+        const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+        expect(input.getAttribute('formaction')).toMatch(/^unsafe:/);
+      });
+    }
   });
 });
 

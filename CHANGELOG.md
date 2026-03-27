@@ -1,3 +1,42 @@
+<a name="20.3.18"></a>
+
+# 20.3.18 (2026-03-12)
+
+### compiler
+
+| Commit                                                                                           | Type | Description                         |
+| ------------------------------------------------------------------------------------------------ | ---- | ----------------------------------- |
+| [02fbf08890](https://github.com/angular/angular/commit/02fbf08890ec6ac2efb6c2ec4f17e56497cb81d2) | fix  | disallow translations of iframe src |
+
+### core
+
+| Commit                                                                                           | Type | Description                                                |
+| ------------------------------------------------------------------------------------------------ | ---- | ---------------------------------------------------------- |
+| [72126f9a08](https://github.com/angular/angular/commit/72126f9a08c185a9b93461bab67841c4e84c9b17) | fix  | sanitize translated attribute bindings with interpolations |
+| [626bc8bc20](https://github.com/angular/angular/commit/626bc8bc20e485cad2094c4a5d9417fb9a71dda8) | fix  | sanitize translated form attributes                        |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.17"></a>
+
+# 20.3.17 (2026-02-25)
+
+## Breaking Changes
+
+### core
+
+- Angular now only applies known attributes from HTML in translated ICU content. Unknown attributes are dropped and not rendered.
+
+  (cherry picked from commit 03da204b6daa5e4583e0d0968c2107390bbd8235)
+
+### core
+
+| Commit                                                                                           | Type | Description                                                  |
+| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------ |
+| [7f9de3c118](https://github.com/angular/angular/commit/7f9de3c118383c09fa8851708c66ec94453a9680) | fix  | block creation of sensitive URI attributes from ICU messages |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
 <a name="20.3.16"></a>
 
 # 20.3.16 (2026-01-07)
