@@ -13,7 +13,7 @@ import {TestBed} from '../../testing';
 import {getLContext, readPatchedData} from '../../src/render3/context_discovery';
 import {CONTEXT, HEADER_OFFSET} from '../../src/render3/interfaces/view';
 import {Sanitizer} from '../../src/sanitization/sanitizer';
-import {SecurityContext} from '../../src/sanitization/security';
+import {SecurityContext} from '../../src/sanitization/dom_security_schema';
 
 describe('element discovery', () => {
   it('should only monkey-patch immediate child nodes in a component', () => {
@@ -612,7 +612,7 @@ describe('sanitization', () => {
       selector: '[unsafeUrlHostBindingDir]',
     })
     class UnsafeUrlHostBindingDir {
-      @HostBinding() cite: any = 'http://cite-dir-value';
+      @HostBinding('href') href: any = 'http://href-dir-value';
 
       constructor() {
         hostBindingDir = this;
@@ -623,7 +623,7 @@ describe('sanitization', () => {
       selector: 'sanitize-this',
       imports: [UnsafeUrlHostBindingDir],
       template: `
-        <blockquote unsafeUrlHostBindingDir></blockquote>
+        <a unsafeUrlHostBindingDir></a>
       `,
     })
     class SimpleComp {}
@@ -640,16 +640,40 @@ describe('sanitization', () => {
       ],
     });
     const fixture = TestBed.createComponent(SimpleComp);
-    hostBindingDir!.cite = 'http://foo';
+    hostBindingDir!.href = 'http://foo';
     fixture.detectChanges();
 
-    const anchor = fixture.nativeElement.querySelector('blockquote')!;
-    expect(anchor.getAttribute('cite')).toEqual('http://bar');
+    const anchor = fixture.nativeElement.querySelector('a')!;
+    expect(anchor.getAttribute('href')).toEqual('http://bar');
 
-    hostBindingDir!.cite = sanitizer.bypassSecurityTrustUrl('http://foo');
+    hostBindingDir!.href = sanitizer.bypassSecurityTrustUrl('http://foo');
     fixture.detectChanges();
 
-    expect(anchor.getAttribute('cite')).toEqual('http://foo');
+    expect(anchor.getAttribute('href')).toEqual('http://foo');
+  });
+
+  // The SVG `attributeName` is case-sensitive when accessed via the DOM API
+  // (i.e. `setAttribute('attributename', ...)` and `setAttribute('attributeName', ...)`
+  // create two distinct attributes). However, the browser tokenizer normalizes
+  // the lowercase form `attributename` to `attributeName` on initial parsing,
+  // which means the client-side sanitizer still ends up seeing `attributeName`.
+  // The SSR renderer (Domino) does not perform this normalization, so we
+  // explicitly look up the lowercase form as well to make sure the sanitizer
+  // is triggered consistently in both environments.
+  it('should throw when binding to set element with attributename="href"', () => {
+    @Component({
+      selector: 'test-comp',
+      template: `<svg><set attributename="href" [attr.to]="'foo'"></set></svg>`,
+    })
+    class TestComp {}
+
+    TestBed.configureTestingModule({
+      providers: [provideZoneChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(TestComp);
+    expect(() => fixture.detectChanges()).toThrowError(
+      /Angular has detected that the `to` was applied/,
+    );
   });
 });
 
