@@ -232,8 +232,14 @@ export function transferCacheInterceptorFn(
     return event$.pipe(
       tap((event: HttpEvent<unknown>) => {
         // Only cache successful HTTP responses that do not have Cache-Control
-        // directives that forbid shared caching (no-store or private).
-        if (event instanceof HttpResponse && !hasUncacheableCacheControl(event.headers)) {
+        // directives that forbid shared caching (no-store or private) and do not
+        // carry a Set-Cookie header. A Set-Cookie header marks the response as
+        // user-specific.
+        if (
+          event instanceof HttpResponse &&
+          !hasUncacheableCacheControl(event.headers) &&
+          !hasSetCookieHeader(event.headers)
+        ) {
           transferState.set<TransferHttpResponse>(storeKey, {
             [BODY]: event.body,
             [HEADERS]: getFilteredHeaders(event.headers, headersToInclude),
@@ -275,6 +281,10 @@ function hasUncacheableCacheControl(headers: HttpHeaders): boolean {
   });
 }
 
+function hasSetCookieHeader(headers: HttpHeaders): boolean {
+  return headers.has('set-cookie');
+}
+
 function isNonCacheableRequest(cache: RequestCache): boolean {
   return cache === 'no-cache' || cache === 'no-store';
 }
@@ -303,17 +313,17 @@ function getFilteredHeaders(
 }
 
 function sortAndConcatParams(params: HttpParams | URLSearchParams): string {
-  return [...params.keys()]
-    .sort()
-    .map((k) => `${k}=${params.getAll(k)}`)
-    .join('&');
+  const searchParams = new URLSearchParams(
+    params instanceof URLSearchParams ? params : params.toString(),
+  );
+  searchParams.sort();
+  return searchParams.toString();
 }
 
 function makeCacheKey(
   request: HttpRequest<any>,
   mappedRequestUrl: string,
 ): StateKey<TransferHttpResponse> {
-  // make the params encoded same as a url so it's easy to identify
   const {params, method, responseType} = request;
   const encodedParams = sortAndConcatParams(params);
 

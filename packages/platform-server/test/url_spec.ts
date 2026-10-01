@@ -74,12 +74,57 @@ describe('parseUrl', () => {
         `NG05703: URL ${url} changed origin unexpectedly. This is suspicious and may indicate a security bypass attempt.`,
       );
     });
+
+    it('should throw on protocol-relative URLs when allowProtocolRelative is false or default', () => {
+      const urls = [
+        '//attacker.example/collect',
+        '///attacker.example/collect',
+        '/.//attacker.example/collect',
+        '/..//attacker.example/collect',
+        '/.\\/attacker.example/collect',
+        'http://test.com/.//attacker.example/collect',
+      ];
+
+      for (const url of urls) {
+        expect(() => parseUrl(url, 'http://test.com')).toThrowError(/NG05702/);
+      }
+    });
+
+    it('should allow protocol-relative URLs when allowProtocolRelative is true', () => {
+      const url = parseUrl('//attacker.example/collect', 'http://test.com', {
+        allowProtocolRelative: true,
+      });
+      expect(url.href).toBe('http://attacker.example/collect');
+      expect(url.origin).toBe('http://attacker.example');
+
+      const dotUrl = parseUrl('/.//attacker.example/collect', 'http://test.com', {
+        allowProtocolRelative: true,
+      });
+      expect(dotUrl.href).toBe('http://test.com//attacker.example/collect');
+    });
+
+    it('should not trim unicode whitespace into protocol-relative URLs', () => {
+      const urls = ['\u00A0//attacker.example/collect', '\uFEFF//attacker.example/collect'];
+
+      for (const urlStr of urls) {
+        const urlWithProtocolRelative = parseUrl(urlStr, 'http://test.com', {
+          allowProtocolRelative: true,
+        });
+        expect(urlWithProtocolRelative.origin).toBe('http://test.com');
+        expect(urlWithProtocolRelative.pathname).toContain('//attacker.example/collect');
+
+        const urlWithoutProtocolRelative = parseUrl(urlStr, 'http://test.com');
+        expect(urlWithoutProtocolRelative.origin).toBe('http://test.com');
+        expect(urlWithoutProtocolRelative.pathname).toContain('//attacker.example/collect');
+      }
+    });
   });
 
   describe('without origin', () => {
     it('should return null for relative paths', () => {
       expect(parseUrl('/deep/path?query#hash')).toBeNull();
       expect(parseUrl('deep/path')).toBeNull();
+      expect(parseUrl('\u00A0//attacker.com/deep/path')).toBeNull();
     });
 
     it('should parse valid absolute URLs', () => {

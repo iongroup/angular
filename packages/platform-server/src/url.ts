@@ -54,8 +54,6 @@ export function parseUrl(
     return originUrl || null;
   }
 
-  urlStr = urlStr.trim();
-
   // Fast-path: if the URL is a valid, standard absolute URL, parse and return it immediately.
   let resolved: URL | undefined;
   try {
@@ -64,6 +62,10 @@ export function parseUrl(
   const {allowProtocolRelative = false, allowOriginChange = true} = options;
 
   if (resolved) {
+    if (isDisallowedProtocolRelative(resolved, allowProtocolRelative)) {
+      throwProtocolRelativeUrlError(urlStr);
+    }
+
     if (originUrl && !isSafeOriginChange(resolved, originUrl, urlStr, allowOriginChange)) {
       throwSuspiciousUrlError(urlStr);
     }
@@ -91,12 +93,7 @@ export function parseUrl(
   // and we are configured to allow and preserve standard cross-origin protocol-relative requests.
   if (urlStr.startsWith('//')) {
     if (!allowProtocolRelative) {
-      throw new RuntimeError(
-        RuntimeErrorCode.PROTOCOL_RELATIVE_URL_NOT_ALLOWED,
-        typeof ngDevMode === 'undefined' || ngDevMode
-          ? `Protocol relative URLs are not allowed in this context. URL: ${urlStr}`
-          : urlStr,
-      );
+      throwProtocolRelativeUrlError(urlStr);
     }
 
     return new URL(urlStr, origin);
@@ -104,11 +101,38 @@ export function parseUrl(
 
   resolved = new URL(urlStr, origin);
 
+  if (isDisallowedProtocolRelative(resolved, allowProtocolRelative)) {
+    throwProtocolRelativeUrlError(urlStr);
+  }
+
   if (!isSafeOriginChange(resolved, originUrl, urlStr, allowOriginChange)) {
     throwSuspiciousUrlError(urlStr);
   }
 
   return resolved;
+}
+
+/**
+ * Checks if the resolved URL has a disallowed protocol-relative path.
+ *
+ * @param resolved The resolved URL.
+ * @param allowProtocolRelative Whether protocol-relative URLs are allowed.
+ * @returns True if the URL has a disallowed protocol-relative path, false otherwise.
+ */
+function isDisallowedProtocolRelative(resolved: URL, allowProtocolRelative: boolean): boolean {
+  return !allowProtocolRelative && resolved.pathname.startsWith('//');
+}
+
+/**
+ * Throws a protocol-relative URL error indicating that protocol-relative URLs are not allowed.
+ */
+function throwProtocolRelativeUrlError(urlStr: string): never {
+  throw new RuntimeError(
+    RuntimeErrorCode.PROTOCOL_RELATIVE_URL_NOT_ALLOWED,
+    typeof ngDevMode === 'undefined' || ngDevMode
+      ? `Protocol relative URLs are not allowed in this context. URL: ${urlStr}`
+      : urlStr,
+  );
 }
 
 /**

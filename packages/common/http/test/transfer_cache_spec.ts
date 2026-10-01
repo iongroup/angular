@@ -10,6 +10,8 @@ import {DOCUMENT} from '../../index';
 import {
   ApplicationRef,
   Component,
+  createEnvironmentInjector,
+  EnvironmentInjector,
   Injectable,
   PLATFORM_ID,
   TransferState,
@@ -19,7 +21,16 @@ import {fakeAsync, flush, TestBed} from '@angular/core/testing';
 import {withBody} from '@angular/private/testing';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 
-import {HttpClient, HttpHeaders, HttpRequest, HttpResponse, provideHttpClient} from '../public_api';
+import {
+  HttpClient,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+  HttpResponse,
+  provideHttpClient,
+  withInterceptors,
+  withRequestsMadeViaParent,
+} from '../public_api';
 import {
   BODY,
   CACHE_OPTIONS,
@@ -214,6 +225,32 @@ describe('TransferCache', () => {
       expect(secondNext).toHaveBeenCalledTimes(1);
     });
 
+    it('should not cache responses with a Set-Cookie header', () => {
+      configureInterceptor();
+
+      const request = new HttpRequest('GET', '/test-set-cookie');
+
+      const firstNext = jasmine.createSpy('firstNext').and.returnValue(
+        of(
+          new HttpResponse({
+            body: 'user-a-session',
+            headers: new HttpHeaders({'Set-Cookie': 'session=user-a; HttpOnly'}),
+          }),
+        ),
+      );
+      const secondNext = jasmine
+        .createSpy('secondNext')
+        .and.returnValue(of(new HttpResponse({body: 'user-b-session'})));
+
+      runOnServer(() => {
+        expect(runInterceptor(request, firstNext).body).toBe('user-a-session');
+        expect(runInterceptor(request, secondNext).body).toBe('user-b-session');
+      });
+
+      expect(firstNext).toHaveBeenCalledTimes(1);
+      expect(secondNext).toHaveBeenCalledTimes(1);
+    });
+
     it('should not cache requests with Cache-Control: no-store', () => {
       configureInterceptor();
 
@@ -258,6 +295,124 @@ describe('TransferCache', () => {
 
       expect(firstNext).toHaveBeenCalledTimes(1);
       expect(secondNext).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('withRequestsMadeViaParent()', () => {
+    let childInjector: EnvironmentInjector;
+
+    beforeEach(() => {
+      globalThis['ngServerMode'] = true;
+
+      TestBed.configureTestingModule({
+        providers: [
+          TransferState,
+          withHttpTransferCache({
+            filter: (request) => !request.headers.has('X-API-Key'),
+          }),
+          provideHttpClient(
+            withInterceptors([
+              (request, next) => {
+                if (request.url === '/private') {
+                  request = request.clone({
+                    setHeaders: {Authorization: 'Bearer server-token'},
+                  });
+                } else if (request.url === '/secret') {
+                  request = request.clone({setHeaders: {'X-API-Key': 'secret-a'}});
+                } else if (request.url === '/public-alias') {
+                  request = request.clone({url: '/public'});
+                }
+
+                return next(request);
+              },
+            ]),
+          ),
+          provideHttpClientTesting(),
+        ],
+      });
+
+      childInjector = createEnvironmentInjector(
+        [
+          provideHttpClient(
+            withInterceptors([
+              (request, next) =>
+                next(request.clone({setHeaders: {'X-Trace-Id': 'feature-request'}})),
+            ]),
+            withRequestsMadeViaParent(),
+          ),
+        ],
+        TestBed.inject(EnvironmentInjector),
+      );
+    });
+
+    afterEach(() => {
+      childInjector.destroy();
+      TestBed.inject(HttpTestingController).verify();
+      globalThis['ngServerMode'] = undefined;
+    });
+
+    it('should evaluate cache eligibility and keys after parent interceptors', () => {
+      const httpClient = childInjector.get(HttpClient);
+      const httpTestingController = TestBed.inject(HttpTestingController);
+      const transferState = TestBed.inject(TransferState);
+
+      let privateResponse: unknown;
+      httpClient.get('/private').subscribe((response) => (privateResponse = response));
+      const privateRequest = httpTestingController.expectOne('/private');
+      expect(privateRequest.request.headers.get('Authorization')).toBe('Bearer server-token');
+      expect(privateRequest.request.headers.get('X-Trace-Id')).toBe('feature-request');
+      privateRequest.flush({internalSecret: 'server-only'});
+
+      expect(privateResponse).toEqual({internalSecret: 'server-only'});
+      expect(JSON.parse(transferState.toJson())).toEqual({});
+
+      let publicResponse: unknown;
+      httpClient.get('/public-alias').subscribe((response) => (publicResponse = response));
+      httpTestingController.expectOne('/public').flush({message: 'public'});
+
+      publicResponse = undefined;
+      httpClient.get('/public-alias').subscribe((response) => (publicResponse = response));
+      httpTestingController.expectNone('/public');
+      expect(publicResponse).toEqual({message: 'public'});
+    });
+
+    it('should evaluate cache filters after parent interceptors', () => {
+      const httpClient = childInjector.get(HttpClient);
+      const httpTestingController = TestBed.inject(HttpTestingController);
+      const transferState = TestBed.inject(TransferState);
+
+      let response: unknown;
+      httpClient.get('/secret').subscribe((value) => (response = value));
+      const request = httpTestingController.expectOne('/secret');
+      expect(request.request.headers.get('X-API-KEY')).toBe('secret-a');
+      request.flush({internalSecret: 'secret-only'});
+
+      expect(response).toEqual({internalSecret: 'secret-only'});
+      expect(JSON.parse(transferState.toJson())).toEqual({});
+    });
+
+    it('should evaluate cache eligibility through multiple parent clients', () => {
+      const grandchildInjector = createEnvironmentInjector(
+        [provideHttpClient(withRequestsMadeViaParent())],
+        childInjector,
+      );
+
+      try {
+        const httpClient = grandchildInjector.get(HttpClient);
+        const httpTestingController = TestBed.inject(HttpTestingController);
+        const transferState = TestBed.inject(TransferState);
+
+        let privateResponse: unknown;
+        httpClient.get('/private').subscribe((response) => (privateResponse = response));
+        const privateRequest = httpTestingController.expectOne('/private');
+        expect(privateRequest.request.headers.get('Authorization')).toBe('Bearer server-token');
+        privateRequest.flush({internalSecret: 'server-only'});
+
+        expect(privateResponse).toEqual({internalSecret: 'server-only'});
+        expect(JSON.parse(transferState.toJson())).toEqual({});
+      } finally {
+        grandchildInjector.destroy();
+      }
     });
   });
 
@@ -398,6 +553,38 @@ describe('TransferCache', () => {
       await expectAsync(TestBed.inject(HttpClient).get('/test-1?foo=1').toPromise()).toBeResolvedTo(
         'foo',
       );
+    });
+
+    it('should differentiate repeated parameters from scalar comma parameters', () => {
+      let scalarResponse!: string;
+      TestBed.inject(HttpClient)
+        .get('/test-params', {params: new HttpParams().set('role', 'user,admin')})
+        .subscribe((response) => (scalarResponse = response as string));
+      TestBed.inject(HttpTestingController)
+        .expectOne('/test-params?role=user,admin')
+        .flush('scalar');
+
+      let repeatedResponse!: string;
+      TestBed.inject(HttpClient)
+        .get('/test-params', {
+          params: new HttpParams().append('role', 'user').append('role', 'admin'),
+        })
+        .subscribe((response) => (repeatedResponse = response as string));
+      TestBed.inject(HttpTestingController)
+        .expectOne('/test-params?role=user&role=admin')
+        .flush('repeated');
+
+      let repeatedCachedResponse!: string;
+      TestBed.inject(HttpClient)
+        .get('/test-params', {
+          params: new HttpParams().append('role', 'user').append('role', 'admin'),
+        })
+        .subscribe((response) => (repeatedCachedResponse = response as string));
+      TestBed.inject(HttpTestingController).expectNone('/test-params?role=user&role=admin');
+
+      expect(scalarResponse).toBe('scalar');
+      expect(repeatedResponse).toBe('repeated');
+      expect(repeatedCachedResponse).toBe('repeated');
     });
 
     it('should skip cache when specified', () => {
@@ -557,6 +744,14 @@ describe('TransferCache', () => {
       });
 
       makeRequestAndExpectOne('/test-private', 'fresh-data');
+    });
+
+    it('should not cache responses with a Set-Cookie header', () => {
+      makeRequestAndExpectOne('/test-set-cookie', 'user-a-session', {
+        responseHeaders: {'Set-Cookie': 'session=user-a; HttpOnly'},
+      });
+
+      makeRequestAndExpectOne('/test-set-cookie', 'user-b-session');
     });
 
     it('should not cache responses with Cache-Control containing no-store among other directives', () => {

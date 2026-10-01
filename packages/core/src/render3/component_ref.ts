@@ -25,6 +25,7 @@ import {ComponentFactoryResolver as AbstractComponentFactoryResolver} from '../l
 import {createElementRef, ElementRef} from '../linker/element_ref';
 import {NgModuleRef} from '../linker/ng_module_factory';
 import {RendererFactory2} from '../render/api';
+import {MATH_ML_NAMESPACE, SVG_NAMESPACE} from '../sanitization/dom_security_schema';
 import {Sanitizer} from '../sanitization/sanitizer';
 
 import {assertComponentType} from './assert';
@@ -47,6 +48,7 @@ import {
   TElementContainerNode,
   TElementNode,
   TNode,
+  TNodeName,
   TNodeType,
 } from './interfaces/node';
 import {RElement, RNode} from './interfaces/renderer_dom';
@@ -60,7 +62,6 @@ import {
   TVIEW,
   TViewType,
 } from './interfaces/view';
-import {MATH_ML_NAMESPACE, SVG_NAMESPACE} from './namespaces';
 
 import {retrieveHydrationInfo} from '../hydration/utils';
 import {ChainedInjector} from './chained_injector';
@@ -193,6 +194,15 @@ function createHostElement(componentDef: ComponentDef<unknown>, renderer: Render
   return createElementNode(renderer, tagName, namespace);
 }
 
+function assertNotScriptHostElement(tagName: string | null | undefined): void {
+  if (tagName?.toLowerCase() === 'script') {
+    throw new RuntimeError(
+      RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT,
+      ngDevMode && `"<script>" tag is not allowed as a component host element.`,
+    );
+  }
+}
+
 /**
  * Infers the tag name that should be used for a component based on its definition.
  * @param componentDef Definition for which to resolve the tag name.
@@ -283,6 +293,7 @@ export class ComponentFactory<T> extends AbstractComponentFactory<T> {
             rootViewInjector,
           )
         : createHostElement(cmpDef, hostRenderer);
+      assertNotScriptHostElement(hostElement?.tagName);
       const hasInputBindings =
         componentBindings?.some(isInputBinding) ||
         directives?.some((d) => typeof d !== 'function' && d.bindings.some(isInputBinding));
@@ -317,7 +328,7 @@ export class ComponentFactory<T> extends AbstractComponentFactory<T> {
           HEADER_OFFSET,
           rootLView,
           TNodeType.Element,
-          '#host',
+          TNodeName.DynamicHost,
           () => rootTView.directiveRegistry,
           true,
           0,

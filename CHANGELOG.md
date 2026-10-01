@@ -1,3 +1,149 @@
+<a name="20.3.33"></a>
+
+# 20.3.33 (2026-09-30)
+
+### platform-server
+
+| Commit                                                                                           | Type | Description                                  |
+| ------------------------------------------------------------------------------------------------ | ---- | -------------------------------------------- |
+| [83944fc8c5](https://github.com/angular/angular/commit/83944fc8c50e86be90e8ec4184cd15002b5af262) | fix  | reject protocol-relative paths in resolveUrl |
+
+### router
+
+| Commit                                                                                           | Type | Description                                                       |
+| ------------------------------------------------------------------------------------------------ | ---- | ----------------------------------------------------------------- |
+| [142f187b3c](https://github.com/angular/angular/commit/142f187b3c8e956aade5457f7f9c8ed73754979b) | fix  | do not copy URL-sized objects into every route snapshot           |
+| [cd8efcb924](https://github.com/angular/angular/commit/cd8efcb924d26464bc42ee436d39e10784cfc240) | fix  | reject duplicate outlets in production builds                     |
+| [b0d2ba0f54](https://github.com/angular/angular/commit/b0d2ba0f54e21cb57ea5a0ca0d8e6065f28e23a0) | fix  | require outlets to match a route before processing child segments |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.32"></a>
+
+# 20.3.32 (2026-09-23)
+
+### router
+
+| Commit                                                                                           | Type | Description                                          |
+| ------------------------------------------------------------------------------------------------ | ---- | ---------------------------------------------------- |
+| [ddfe21072b](https://github.com/angular/angular/commit/ddfe21072ba32ca4cd9d7d3c6b7df66af81d58c4) | fix  | avoid dense elements allocation for numeric URL keys |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.31"></a>
+
+# 20.3.31 (2026-09-09)
+
+### platform-server
+
+| Commit                                                                                           | Type | Description                     |
+| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------- |
+| [3db26e2544](https://github.com/angular/angular/commit/3db26e2544964d07a520836ad01f02f36ec88e25) | fix  | update domino to latest version |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.30"></a>
+
+# 20.3.30 (2026-08-26)
+
+### platform-server
+
+| Commit                                                                                           | Type | Description                                              |
+| ------------------------------------------------------------------------------------------------ | ---- | -------------------------------------------------------- |
+| [9339a7a2de](https://github.com/angular/angular/commit/9339a7a2de437ed93f9cc3da7f32d0100412d599) | fix  | avoid stripping unicode whitespace during url resolution |
+| [89b20568df](https://github.com/angular/angular/commit/89b20568dfaee1ec8e0b3bcf1872acdddd2f4fef) | fix  | update domino to latest version                          |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.29"></a>
+
+# 20.3.29 (2026-08-19)
+
+### platform-browser
+
+| Commit                                                                                           | Type | Description                               |
+| ------------------------------------------------------------------------------------------------ | ---- | ----------------------------------------- |
+| [7538744c10](https://github.com/angular/angular/commit/7538744c1048701d12e86e992704ea5fa13df4f4) | fix  | disallow event handler attributes in Meta |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.28"></a>
+
+# 20.3.28 (2026-08-13)
+
+### core
+
+| Commit                                                                                           | Type | Description                              |
+| ------------------------------------------------------------------------------------------------ | ---- | ---------------------------------------- |
+| [2f96c8020f](https://github.com/angular/angular/commit/2f96c8020f85ccb715a76de4b79a0c680c2c7264) | fix  | sanitize host bindings on concrete hosts |
+
+### http
+
+| Commit                                                                                           | Type | Description                                         |
+| ------------------------------------------------------------------------------------------------ | ---- | --------------------------------------------------- |
+| [969133d426](https://github.com/angular/angular/commit/969133d426723336eb04ab839ff30d884ce54dd9) | fix  | match header values exactly when deleting           |
+| [29dd26bd71](https://github.com/angular/angular/commit/29dd26bd7115f90ea059a1a5d174203255033e36) | fix  | preserve immutability of materialized clones        |
+| [e4c416c20a](https://github.com/angular/angular/commit/e4c416c20a1cb222ce73d29c035452b257380c56) | fix  | run root interceptors in the terminal request chain |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.27"></a>
+
+# 20.3.27 (2026-07-29)
+
+### compiler
+
+| Commit                                                                                           | Type | Description                                                                      |
+| ------------------------------------------------------------------------------------------------ | ---- | -------------------------------------------------------------------------------- |
+| [5dbcd0ee16](https://github.com/angular/angular/commit/5dbcd0ee16011369bec00e10e22cbcae6ebabd7a) | fix  | disallow i18n event attributes                                                   |
+| [db0d4a1a39](https://github.com/angular/angular/commit/db0d4a1a39db2dc0773f3bc9d7a0e1cfc59fa251) | fix  | restrict possible event handler check to property names longer than 2 characters |
+
+### http
+
+| Commit                                                                                           | Type | Description                                |
+| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------ |
+| [a64e2883e9](https://github.com/angular/angular/commit/a64e2883e9dc4abdac70209129be303de79e5b2b) | fix  | distinguish repeated transfer cache params |
+
+### platform-server
+
+| Commit                                                                                           | Type | Description                     |
+| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------- |
+| [6f80cca0b8](https://github.com/angular/angular/commit/6f80cca0b8af23b37f24fb8ee0229b6901d01df2) | fix  | update domino to latest version |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
+<a name="20.3.26"></a>
+
+# 20.3.26 (2026-07-08)
+
+### compiler-cli
+
+| Commit                                                                                           | Type | Description                            |
+| ------------------------------------------------------------------------------------------------ | ---- | -------------------------------------- |
+| [406aaa31e6](https://github.com/angular/angular/commit/406aaa31e6ac4d3c155f5ab76e315ccd8d0387fe) | fix  | update babel dependencies to latest v7 |
+
+### core
+
+| Commit                                                                                           | Type | Description                         |
+| ------------------------------------------------------------------------------------------------ | ---- | ----------------------------------- |
+| [26831d0cbd](https://github.com/angular/angular/commit/26831d0cbd7e692210ca0799a203a7a5a0e741cd) | fix  | avoid caching missing locale data   |
+| [8eb7aea08b](https://github.com/angular/angular/commit/8eb7aea08b27c0f1bcdeec3171880a6fcf28aa9a) | fix  | reject dynamic script host elements |
+
+### http
+
+| Commit                                                                                           | Type | Description                                          |
+| ------------------------------------------------------------------------------------------------ | ---- | ---------------------------------------------------- |
+| [b963f61028](https://github.com/angular/angular/commit/b963f61028c747843db48c6fb82965123365fd4a) | fix  | prevent caching of responses with Set-Cookie headers |
+
+### service-worker
+
+| Commit                                                                                           | Type | Description                                |
+| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------ |
+| [1fdf234168](https://github.com/angular/angular/commit/1fdf2341684a0f528d1d31005bd48d882c0a47d1) | fix  | preserve referrer in asset requests        |
+| [baa093ba68](https://github.com/angular/angular/commit/baa093ba68c1d5ca7c35c562568c6021eb409b4c) | fix  | preserve referrer policy in asset requests |
+
+<!-- CHANGELOG SPLIT MARKER -->
+
 <a name="20.3.25"></a>
 
 # 20.3.25 (2026-06-10)
