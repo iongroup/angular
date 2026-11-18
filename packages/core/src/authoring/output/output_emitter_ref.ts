@@ -48,11 +48,13 @@ export class OutputEmitterRef<T> implements OutputRef<T> {
 
   subscribe(callback: (value: T) => void): OutputRefSubscription {
     if (this.destroyed) {
-      throw new RuntimeError(
-        RuntimeErrorCode.OUTPUT_REF_DESTROYED,
-        ngDevMode &&
-          'Unexpected subscription to destroyed `OutputRef`. ' +
-            'The owning directive/component is destroyed.',
+      console.warn(
+        formatRuntimeError(
+          RuntimeErrorCode.OUTPUT_REF_DESTROYED,
+          ngDevMode &&
+            'Unexpected subscription to destroyed `OutputRef`. ' +
+              'The owning directive/component is destroyed.',
+        ),
       );
     }
 
